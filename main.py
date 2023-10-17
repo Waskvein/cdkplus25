@@ -1,4 +1,4 @@
-from cdk8s import App, Chart, Size
+from cdk8s import App, Chart, Size, ApiObjectMetadata
 from constructs import Construct
 import cdk8s_plus_25 as kplus
 
@@ -56,7 +56,9 @@ class Application(Chart):
             hostnamecheck = input("are you want change standard hostname?  yes or no ")
             if hostnamecheck == "yes":
                 hostname = input("enter hostname ")
-            ingress = kplus.Ingress(self, "ingress", tls=[kplus.IngressTls(hosts=[hostname])])
+            ingress_metadata=ApiObjectMetadata(annotations={"kubernetes.io/ingress.class": "nginx",
+                                                            "cert-manager.io/cluster-issuer": "letsencrypt-prod"})
+            ingress = kplus.Ingress(self, "ingress", tls=[kplus.IngressTls(hosts=[hostname])], metadata=ingress_metadata)
             ingress.add_host_rule(path="/", host=hostname,
                                   backend=kplus.IngressBackend.from_service(serv=service,
                                                                             port=int(input("input ingress port "))))
